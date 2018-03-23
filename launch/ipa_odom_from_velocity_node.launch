@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- LAUNCH NODE -->
+    <node name="ipa_odom_from_velocity_node" pkg="ipa_odom_from_velocity" type="ipa_odom_from_velocity_node" output="screen">
+    </node>
+</launch>
