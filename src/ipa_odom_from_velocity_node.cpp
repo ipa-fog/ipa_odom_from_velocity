@@ -12,9 +12,23 @@ OdomFromVelocityNode::OdomFromVelocityNode(ros::NodeHandle node_handle):
 {
   
     cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("cmd_vel", 50, &OdomFromVelocityNode::cmd_callback, this);
-    odom_pub_ = node_.advertise<nav_msgs::Odometry>("odom", 50);
+    tf_sub_ = node_.subscribe<tf2_msgs::TFMessage>("tf", 50, &OdomFromVelocityNode::tf_callback, this);
+
+    odom_pub_= node_.advertise<nav_msgs::Odometry>("odom", 50);
+}
+
+
+void OdomFromVelocityNode::tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf)
+{
+
+    odom_.header.stamp = ros::Time::now();
+    odom_pub_.publish(odom_);
+    ROS_INFO("x %f, y %f , t %f ",x_ , y_, th_);
 
 }
+
+
+
 
 void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd)
 {
@@ -22,7 +36,6 @@ void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cm
     double vx = cmd->linear.x;
     double vy = cmd->linear.y;
     double vth = cmd->angular.z;
-    ROS_INFO("x %f, y %f , t %f ", vx, vy, vth);
 
     current_time_ = ros::Time::now();
     //compute odometry in a typical way given the velocities of the robot
@@ -67,13 +80,9 @@ void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cm
     odom_.twist.twist.linear.x = vx;
     odom_.twist.twist.linear.y = vy;
     odom_.twist.twist.angular.z = vth;
-
-    //publish the message
-    odom_pub_.publish(odom_);
-
-    last_time_ = current_time_;
-
+    last_time_ = current_time_;   
 }
+
 
 
 int main(int argc, char** argv)
@@ -83,8 +92,6 @@ int main(int argc, char** argv)
     ros::NodeHandle node_handle;
     OdomFromVelocityNode ipa_odom_from_velocity_node(node_handle);
 
-    ROS_INFO("Node is spinning...");
     ros::spin();
-
     return 0;
 }

@@ -13,7 +13,7 @@ else()
 endif()
 
 
-find_package(catkin REQUIRED COMPONENTS nav_msgs roscpp tf)
+find_package(catkin REQUIRED COMPONENTS nav_msgs roscpp tf geometry_msgs tf2_geometry_msgs tf2_msgs)
 
 
 catkin_package()

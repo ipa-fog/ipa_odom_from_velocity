@@ -12,6 +12,10 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <tf/transform_listener.h>
+#include "geometry_msgs/TransformStamped.h"
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <tf2_msgs/TFMessage.h>
 
 
 class OdomFromVelocityNode
@@ -22,9 +26,11 @@ public:
 private:
  	ros::NodeHandle node_;
 	ros::Subscriber cmd_vel_sub_;
+	ros::Subscriber tf_sub_;
 	ros::Publisher odom_pub_;
     nav_msgs::Odometry odom_;
 
+    bool run_loop_ = true;
 
     double x_= 0.0;
     double y_ = 0.0;
@@ -32,8 +38,12 @@ private:
 
     ros::Time current_time_, last_time_;
     tf::TransformBroadcaster odom_broadcaster_;
+    void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
+    void tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf);
 
-	void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
+
+
+
 
 };
 
