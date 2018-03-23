@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ipa_obstacle_avoidance</name>
+  <name>ipa_odom_from_velocity</name>
   <version>0.1.0</version>
   <description>ipa_odom_from_velocity</description>
 
