@@ -11,79 +11,68 @@ OdomFromVelocityNode::OdomFromVelocityNode(ros::NodeHandle node_handle):
 	node_(node_handle)
 {
     
-    cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("cmd_vel", 50, &OdomFromVelocityNode::cmd_callback, this);
-    odom_pub_= node_.advertise<nav_msgs::Odometry>("odom", 50);
-    loop_func();
+    	cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("cmd_vel", 50, &OdomFromVelocityNode::cmd_callback, this);
+    	tf_sub_ = node_.subscribe<tf2_msgs::TFMessage>("tf", 50, &OdomFromVelocityNode::tf_callback, this);
+	odom_pub_= node_.advertise<nav_msgs::Odometry>("odom", 50);   
 }
 
-void OdomFromVelocityNode::loop_func()
+
+void OdomFromVelocityNode::tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf)
 {
-	ros::Rate r(50);
-  	while(ros::ok())
-	{
-		odom_quat = tf::createQuaternionMsgFromYaw(th_);
 
-		// publish tf
-		odom_trans_.header.stamp = current_time_;
-		odom_trans_.header.frame_id = "odom_combined";
-		odom_trans_.child_frame_id = "base_footprint";
+	// publish odom
+	odom_.header.stamp = ros::Time::now();
+	odom_pub_.publish(odom_);
 
-		odom_trans_.transform.translation.x = x_;
-		odom_trans_.transform.translation.y = y_;
-		odom_trans_.transform.translation.z = 0.0;
-		odom_trans_.transform.rotation = odom_quat;
-		ROS_INFO("x2 %f", x_);
-		//send the transform
-		odom_broadcaster_.sendTransform(odom_trans_);
-
-		//next, we'll publish the odometry message over ROS
-		odom_.header.stamp = current_time_;
-		odom_.header.frame_id = "odom_combined";
-		odom_.child_frame_id = "base_footprint";
-
-		//set the position
-		odom_.pose.pose.position.x = x_;
-		odom_.pose.pose.position.y = y_;
-		odom_.pose.pose.position.z = 0.0;
-		odom_.pose.pose.orientation = odom_quat;
-
-		//set the velocity
-		odom_.twist.twist.linear.x = vx_;
-		odom_.twist.twist.linear.y = vy_;
-		odom_.twist.twist.angular.z = vth_;
-		last_time_ = current_time_;
-
-		odom_pub_.publish(odom_);
-
- 		r.sleep();
-	}
-
+	// publish new tf
+	odom_trans_.header.stamp = ros::Time::now();
+	odom_broadcaster_.sendTransform(odom_trans_);
 }
-
 
 
 void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd)
 {
+	// get velocity from ROS-Topic cmd_vel 
+	vx_ = cmd->linear.x;
+	vy_ = cmd->linear.y;
+	vth_ = cmd->angular.z;
 
-    vx_ = cmd->linear.x;
-    vy_ = cmd->linear.y;
-    vth_ = cmd->angular.z;
+	current_time_ = ros::Time::now();
 
-    current_time_ = ros::Time::now();
+	//compute odometry in a typical way given the velocities of the robot
+	double dt = (current_time_ - last_time_).toSec();
+	double delta_x = (vx_ * cos(th_) - vy_ * sin(th_)) * dt;
+	double delta_y = (vx_ * sin(th_) + vy_ * cos(th_)) * dt;
+	double delta_th = vth_ * dt;
 
-    //compute odometry in a typical way given the velocities of the robot
-    double dt = (current_time_ - last_time_).toSec();
-    double delta_x = (vx_ * cos(th_) - vy_ * sin(th_)) * dt;
-    double delta_y = (vx_ * sin(th_) + vy_ * cos(th_)) * dt;
-    double delta_th = vth_ * dt;
+	x_ += delta_x;
+	y_ += delta_y;
+	th_ += delta_th;
 
-    x_ += delta_x;
-    y_ += delta_y;
-    th_ += delta_th;
+	odom_quat = tf::createQuaternionMsgFromYaw(th_);
 
-    ROS_INFO("x3 %f", x_);
+	// create new tf
+	odom_trans_.header.frame_id = "odom_combined";
+	odom_trans_.child_frame_id = "base_footprint";
+	odom_trans_.transform.translation.x = x_;
+	odom_trans_.transform.translation.y = y_;
+	odom_trans_.transform.translation.z = 0.0;
+	odom_trans_.transform.rotation = odom_quat;
+
+
+	// create odometry from velocity commands 
+	odom_.header.stamp = current_time_;
+	odom_.header.frame_id = "odom_combined";
+	odom_.child_frame_id = "base_footprint";
+	odom_.pose.pose.position.x = x_;
+	odom_.pose.pose.position.y = y_;
+	odom_.pose.pose.position.z = 0.0;
+	odom_.pose.pose.orientation = odom_quat;
+	odom_.twist.twist.linear.x = vx_;
+	odom_.twist.twist.linear.y = vy_;
+	odom_.twist.twist.angular.z = vth_;
+	last_time_ = current_time_;
 }
-
 
 
 int main(int argc, char** argv)

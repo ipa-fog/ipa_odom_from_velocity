@@ -42,7 +42,7 @@ private:
 	tf::TransformBroadcaster odom_broadcaster_;
 	geometry_msgs::Quaternion odom_quat;
 
-	void loop_func();
+ 	void tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf); 
 	void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
 
 };
