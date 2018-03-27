@@ -34,9 +34,15 @@ private:
 	double x_= 0.0;
 	double y_ = 0.0;
 	double th_ = 0.0;
-
+	double vx_ = 0.0;
+    	double vy_ = 0.0;
+    	double vth_ = 0.0;
+    	geometry_msgs::TransformStamped odom_trans_;
 	ros::Time current_time_, last_time_;
 	tf::TransformBroadcaster odom_broadcaster_;
+	geometry_msgs::Quaternion odom_quat;
+
+	void loop_func();
 	void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
 
 };
