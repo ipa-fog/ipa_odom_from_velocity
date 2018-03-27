@@ -29,7 +29,7 @@ private:
 	ros::Subscriber tf_sub_;
 	ros::Publisher odom_pub_;
     nav_msgs::Odometry odom_;
-
+    geometry_msgs::TransformStamped odom_trans;
     bool run_loop_ = true;
 
     double x_= 0.0;

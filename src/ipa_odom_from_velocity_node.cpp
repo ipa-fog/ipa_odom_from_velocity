@@ -23,7 +23,8 @@ void OdomFromVelocityNode::tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf)
 
     odom_.header.stamp = ros::Time::now();
     odom_pub_.publish(odom_);
-    ROS_INFO("x %f, y %f , t %f ",x_ , y_, th_);
+   // ROS_INFO("x %f, y %f , t %f ",x_ , y_, th_);
+    odom_broadcaster_.sendTransform(odom_trans);
 
 }
 
@@ -52,7 +53,6 @@ void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cm
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th_);
 
     //first, we'll publish the transform over tf
-    geometry_msgs::TransformStamped odom_trans;
     odom_trans.header.stamp = current_time_;
     odom_trans.header.frame_id = "odom_combined";
     odom_trans.child_frame_id = "base_footprint";
