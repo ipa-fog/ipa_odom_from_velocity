@@ -21,29 +21,23 @@
 class OdomFromVelocityNode
 {
 public:
-    OdomFromVelocityNode(ros::NodeHandle node_handle);
+	OdomFromVelocityNode(ros::NodeHandle node_handle);
 
 private:
- 	ros::NodeHandle node_;
+	ros::NodeHandle node_;
 	ros::Subscriber cmd_vel_sub_;
 	ros::Subscriber tf_sub_;
 	ros::Publisher odom_pub_;
-    nav_msgs::Odometry odom_;
-    geometry_msgs::TransformStamped odom_trans;
-    bool run_loop_ = true;
+	nav_msgs::Odometry odom_;
+	bool run_loop_ = true;
 
-    double x_= 0.0;
-    double y_ = 0.0;
-    double th_ = 0.0;
+	double x_= 0.0;
+	double y_ = 0.0;
+	double th_ = 0.0;
 
-    ros::Time current_time_, last_time_;
-    tf::TransformBroadcaster odom_broadcaster_;
-    void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
-    void tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf);
-
-
-
-
+	ros::Time current_time_, last_time_;
+	tf::TransformBroadcaster odom_broadcaster_;
+	void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
 
 };
 

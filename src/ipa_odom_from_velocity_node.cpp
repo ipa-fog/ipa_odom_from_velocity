@@ -12,21 +12,9 @@ OdomFromVelocityNode::OdomFromVelocityNode(ros::NodeHandle node_handle):
 {
   
     cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("cmd_vel", 50, &OdomFromVelocityNode::cmd_callback, this);
-    tf_sub_ = node_.subscribe<tf2_msgs::TFMessage>("tf", 50, &OdomFromVelocityNode::tf_callback, this);
-
     odom_pub_= node_.advertise<nav_msgs::Odometry>("odom", 50);
 }
 
-
-void OdomFromVelocityNode::tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf)
-{
-
-    odom_.header.stamp = ros::Time::now();
-    odom_pub_.publish(odom_);
-   // ROS_INFO("x %f, y %f , t %f ",x_ , y_, th_);
-    odom_broadcaster_.sendTransform(odom_trans);
-
-}
 
 
 
@@ -52,6 +40,7 @@ void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cm
     //since all odometry is 6DOF we'll need a quaternion created from yaw
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th_);
 
+    geometry_msgs::TransformStamped odom_trans;
     //first, we'll publish the transform over tf
     odom_trans.header.stamp = current_time_;
     odom_trans.header.frame_id = "odom_combined";
@@ -80,7 +69,10 @@ void OdomFromVelocityNode::cmd_callback(const geometry_msgs::Twist::ConstPtr& cm
     odom_.twist.twist.linear.x = vx;
     odom_.twist.twist.linear.y = vy;
     odom_.twist.twist.angular.z = vth;
-    last_time_ = current_time_;   
+    last_time_ = current_time_;
+
+    odom_pub_.publish(odom_);
+   
 }
 
 
