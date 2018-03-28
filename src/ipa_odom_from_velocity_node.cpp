@@ -19,14 +19,17 @@ OdomFromVelocityNode::OdomFromVelocityNode(ros::NodeHandle node_handle):
 
 void OdomFromVelocityNode::tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf)
 {
+	if(ros::Time::now() - t_last  >	ros::Duration(0.05)) //publish at 20 hz
+	{
+		// publish odom
+		odom_.header.stamp = ros::Time::now();
+		odom_pub_.publish(odom_);
 
-	// publish odom
-	odom_.header.stamp = ros::Time::now();
-	odom_pub_.publish(odom_);
-
-	// publish new tf
-	odom_trans_.header.stamp = ros::Time::now();
-	odom_broadcaster_.sendTransform(odom_trans_);
+		// publish new tf
+		odom_trans_.header.stamp = ros::Time::now();
+		odom_broadcaster_.sendTransform(odom_trans_);	
+		t_last = ros::Time::now();
+	}
 }
 
 

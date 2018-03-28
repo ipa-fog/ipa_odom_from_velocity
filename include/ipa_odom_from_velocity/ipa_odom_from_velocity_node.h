@@ -29,7 +29,6 @@ private:
 	ros::Subscriber tf_sub_;
 	ros::Publisher odom_pub_;
 	nav_msgs::Odometry odom_;
-	bool run_loop_ = true;
 
 	double x_= 0.0;
 	double y_ = 0.0;
@@ -39,8 +38,9 @@ private:
     	double vth_ = 0.0;
     	geometry_msgs::TransformStamped odom_trans_;
 	ros::Time current_time_, last_time_;
+	ros::Time t_last = ros::Time::now();
 	tf::TransformBroadcaster odom_broadcaster_;
-	geometry_msgs::Quaternion odom_quat;
+	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(0);
 
  	void tf_callback(const tf2_msgs::TFMessage::ConstPtr& tf); 
 	void cmd_callback(const geometry_msgs::Twist::ConstPtr& cmd);
